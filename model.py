@@ -104,9 +104,27 @@ def modeling(classifier, X, y, featuresSelected:list= ["All"], overSampling = Fa
 
 applicationTrain=pd.read_csv('applicationTrain.csv', index_col = 0)
 applicationTrain_y=np.ravel(pd.read_csv('applicationTrain_y.csv', index_col = 0))
-applicationTrain_X=pd.read_csv('applicationTrain_X.csv', index_col = 0)
+applicationTrain_X=pd.read_csv('applicationTrain_X.csv', index_col = 0).drop(columns=["SK_ID_CURR"])
 
 model = modeling(LGBMClassifier(), applicationTrain_X, applicationTrain_y)
 
-with open('clf', 'wb') as myModel:
-    pickle.dump(model, myModel)
+with open('clf.pkl', 'wb') as output_file:
+    pickle.dump(model, output_file)
+
+# random under sampling
+n=len(applicationTrain[applicationTrain["TARGET"]==1])
+dataBaseline=applicationTrain[applicationTrain["TARGET"]==0].sample(n,random_state=0,axis=0)
+dataBaseline=dataBaseline.append(applicationTrain[applicationTrain["TARGET"]==1])
+under_y=dataBaseline["TARGET"]
+under_X=dataBaseline.drop(columns=["TARGET","SK_ID_CURR"])
+
+# feature selection with BorutaPy
+feat_selector = BorutaPy(LGBMClassifier(num_boost_round = 100), n_estimators='auto', verbose=2, random_state=1)
+feat_selector.fit(under_X.values, under_y.values)
+
+# oversampling using feature selection
+over_X=applicationTrain[applicationTrain_X.columns[feat_selector.support_]]
+model = modeling(LGBMClassifier(), over_X, applicationTrain_y, overSampling = True)
+
+with open('clf_feat_over.pkl', 'wb') as output_file:
+    pickle.dump(model, output_file)

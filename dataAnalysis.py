@@ -51,6 +51,7 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
                         y=[0, row["AMT_PAYMENT"]],
                         mode='lines',
                         line = dict(color='red', width=2),
+                        name = "LATE PAYMENT",
                         showlegend=False
                     )
                 )
