@@ -94,8 +94,8 @@ def modeling(classifier, X, y, featuresSelected:list= ["All"], overSampling = Fa
         XTrain, yTrain = oversampling.fit_resample(XTrain, yTrain)
     scoring = {"auc": make_scorer(roc_auc_score), "accuracy": make_scorer(accuracy_score)}
     cv = cross_validate(classifier,XTrain, yTrain , cv=4,scoring = scoring)
-    print(np.mean(cv["test_auc"]))
-    print(np.mean(cv["test_accuracy"]))
+    #print(np.mean(cv["test_auc"]))
+    #print(np.mean(cv["test_accuracy"]))
     classifier.fit(XTrain, yTrain,eval_metric='auc', eval_set=[(XTest, yTest)])
     yPred=classifier.predict(XTest)
     print("classification report : ", classification_report(yTest,yPred))
@@ -119,12 +119,15 @@ under_y=dataBaseline["TARGET"]
 under_X=dataBaseline.drop(columns=["TARGET","SK_ID_CURR"])
 
 # feature selection with BorutaPy
-feat_selector = BorutaPy(LGBMClassifier(num_boost_round = 100), n_estimators='auto', verbose=2, random_state=1)
+feat_selector = BorutaPy(LGBMClassifier(num_boost_round = 100), n_estimators='auto', random_state=1)
 feat_selector.fit(under_X.values, under_y.values)
 
 # oversampling using feature selection
-over_X=applicationTrain[applicationTrain_X.columns[feat_selector.support_]]
-model = modeling(LGBMClassifier(), over_X, applicationTrain_y, overSampling = True)
+featSelect_X=applicationTrain[applicationTrain_X.columns[feat_selector.support_]]
+featSelect_X.to_csv('featSelectTrain_X.csv')
+modelOver = modeling(LGBMClassifier(), featSelect_X, applicationTrain_y, overSampling = True)
+
+# Optimisation des hyperparamètres
 
 with open('clf_feat_over.pkl', 'wb') as output_file:
-    pickle.dump(model, output_file)
+    pickle.dump(modelOver, output_file)

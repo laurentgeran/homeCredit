@@ -1,9 +1,14 @@
 import pandas as pd 
 import plotly.graph_objects as go
-from yaml import load
+import matplotlib.pyplot as plt
 
-def loadData(csvName):
-    return(pd.read_csv(csvName))
+
+def loadData(csvName, index_column = False):
+    if index_column:
+        return(pd.read_csv(csvName, index_col=0))
+    else:
+        return(pd.read_csv(csvName))
+
 
 def mylist (df, columnFilter, columnValue, columnResult):
     return (df[df[columnFilter]==columnValue][columnResult])
@@ -16,7 +21,6 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
     nbPrevApp = min(len(sk_id_prevs),3)
     fig = go.Figure()
     colors = ['green','yellow','orange']
-    late = []
     for i in range(0,nbPrevApp) :
         sk_id_prev = sk_id_prevs[i]
         history = installmentsPayments[installmentsPayments['SK_ID_PREV']==sk_id_prev].sort_values("DAYS_INSTALMENT")
@@ -55,4 +59,44 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
                         showlegend=False
                     )
                 )
+    return(fig)
+
+def kde_target(var_name, df, index):
+    
+    # Calculate the correlation coefficient between the new variable and the target
+    corr = df['TARGET'].corr(df[var_name])
+    
+    # Calculate medians for repaid vs not repaid
+    avg_repaid = df.loc[df['TARGET'] == 0, var_name].median()
+    avg_not_repaid = df.loc[df['TARGET'] == 1, var_name].median()
+    
+    repaid = df.loc[df['TARGET'] == 0, var_name]
+    notRepaid = df.loc[df['TARGET'] == 1, var_name]
+
+    # Group data together
+    groupData = [repaid, notRepaid]
+    groupLabels = ['TARGET == 0','TARGET == 1']
+
+    fig, ax = plt.subplots()
+    ax.hist(groupData, density=True, bins = 20, histtype= 'step',label=groupLabels)
+    ax.legend(prop={'size': 10})
+    ax.set_title('Histogram of {var}'.format(var=var_name))
+    
+    value = df.loc[:, var_name][index]
+    nValue = len(df[df[var_name]==value])
+    if df.iloc[index,:]['TARGET'] == 0:
+        densityValue = nValue/len(repaid)
+    else:
+        densityValue = nValue/len(notRepaid)
+
+    ax.vlines(
+        df.loc[:, var_name][index], densityValue-0.05,densityValue+0.05, #transform=ax.get_xaxis_transform(), 
+        colors='r'
+        )
+    
+    # print out the correlation
+    #print('The correlation between %s and the TARGET is %0.4f' % (var_name, corr))
+    # Print out average values
+    #print('Median value for loan that was not repaid = %0.4f' % avg_not_repaid)
+    #print('Median value for loan that was repaid =     %0.4f' % avg_repaid)
     return(fig)

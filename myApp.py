@@ -18,25 +18,30 @@ subheader3_2 = 'Interpretation'
 
 applicationInit = dataAnalysis.loadData('data/application_train.csv')
 applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')
-applicationFeatModel = applicationFeat.drop(columns=['SK_ID_CURR'])
+application_y = dataAnalysis.loadData('applicationTrain_y.csv')
+applicationFeatSelect = dataAnalysis.loadData('featSelectTrain_X.csv',True)
 previousApplication = dataAnalysis.loadData('data/previous_application.csv')
 installmentsPayments = dataAnalysis.loadData('data/installments_payments.csv')
+
+application_Xy = applicationFeatSelect.join(application_y)
 
 with open(r"clf_feat_over.pkl", "rb") as input_file:
     model = pickle.load(input_file)
 
 st.header(header1)
 
-SK_ID_CURR = int(st.text_input('Please enter a SK_ID_CURR', '380361'))
+SK_ID_CURR = int(st.text_input('Please enter a SK_ID_CURR', '100002'))
 
 st.write('The entered SK_ID_CURR is', str(SK_ID_CURR))
 
 st.header(header2)
 
 indiv_currentInit = applicationInit[applicationInit['SK_ID_CURR']==SK_ID_CURR]
-indiv_currentFeat = applicationFeat[applicationFeat['SK_ID_CURR']==SK_ID_CURR].drop(columns=['SK_ID_CURR'])
-
+indiv_currentFeat = applicationFeat[applicationFeat['SK_ID_CURR']==SK_ID_CURR]
 indexIndiv = indiv_currentFeat.index.values[0]
+indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
+
+
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
 loanRateIndiv = np.round(indiv_currentFeat['LOAN_RATE'].values[0]*100,3)
 telAgeIndiv = np.floor(-indiv_currentFeat['DAYS_LAST_PHONE_CHANGE'].values[0]/365.5)
@@ -46,15 +51,14 @@ longestRemainIndiv = indiv_currentFeat['CNT_INSTALMENT_FUTURE_min_max'].values[0
 maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
-scoreIndiv = np.round(model.predict_proba(indiv_currentFeat)[0][1]*100,1)
-print(indexIndiv)
+scoreIndiv = np.round(model.predict_proba(indiv_currentFeatSelect)[0][1]*100,1)
 
 usage = st.radio(
      'What are you looking for ?',
      ('Description', 'Comparison'))
      
 
-if usage == 'Comparison':
+"""if usage == 'Comparison':
 
     criteria = st.multiselect(
     'Which criteria the subsample should have in common with the selected client ?',
@@ -158,7 +162,7 @@ elif usage == 'Description':
 
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv))
 
-    st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width=True)
+    st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width= True)
 
 st.header(header3)
 
@@ -168,6 +172,17 @@ col3_1, col3_2 = st.columns(2)
 
 col3_1.metric('Score',  '{score}%'.format(score = scoreIndiv))
 
-st.subheader(subheader3_2)
+st.subheader(subheader3_2)"""
 
-st.pyplot(interpret.shapBarPlot(model,applicationFeatModel,indexIndiv))
+shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
+
+st.pyplot(shapPlot)
+
+#if scoreIndiv >= 50:
+nbVar = len(varContribNeg)
+var = [var[0] for var in varContribNeg]
+print(var)
+nbPlot = 0
+while nbPlot < min(nbVar,3):
+    st.pyplot(dataAnalysis.kde_target(var[nbPlot],application_Xy, indexIndiv))
+    nbPlot+=1
