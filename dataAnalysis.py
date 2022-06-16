@@ -19,7 +19,11 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
     sk_id_prevs = sk_id_prevs.loc[(sk_id_prevs.isna().sum(axis=1)/nbCol<0.3),:]
     sk_id_prevs = sk_id_prevs['SK_ID_PREV'].values
     nbPrevApp = min(len(sk_id_prevs),3)
-    fig = go.Figure()
+    fig = go.Figure(
+        layout=go.Layout(
+            title=go.layout.Title(text="History of last 3 (max) Applications")
+            )
+        )
     colors = ['green','yellow','orange']
     for i in range(0,nbPrevApp) :
         sk_id_prev = sk_id_prevs[i]
@@ -78,19 +82,12 @@ def kde_target(var_name, df, index):
     groupLabels = ['TARGET == 0','TARGET == 1']
 
     fig, ax = plt.subplots()
-    ax.hist(groupData, density=True, bins = 20, histtype= 'step',label=groupLabels)
+    ax.hist(groupData, density=True,bins=20, histtype= 'step',label=groupLabels)
     ax.legend(prop={'size': 10})
     ax.set_title('Histogram of {var}'.format(var=var_name))
-    
-    value = df.loc[:, var_name][index]
-    nValue = len(df[df[var_name]==value])
-    if df.iloc[index,:]['TARGET'] == 0:
-        densityValue = nValue/len(repaid)
-    else:
-        densityValue = nValue/len(notRepaid)
 
     ax.vlines(
-        df.loc[:, var_name][index], densityValue-0.05,densityValue+0.05, #transform=ax.get_xaxis_transform(), 
+        df.loc[:, var_name][index], 0,1, transform=ax.get_xaxis_transform(), 
         colors='r'
         )
     

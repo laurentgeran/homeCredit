@@ -45,20 +45,21 @@ indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).res
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
 loanRateIndiv = np.round(indiv_currentFeat['LOAN_RATE'].values[0]*100,3)
 telAgeIndiv = np.floor(-indiv_currentFeat['DAYS_LAST_PHONE_CHANGE'].values[0]/365.5)
-#latePayIndiv = indiv_currentFeat['LATE_sum_prev_sum'].values[0]
+previousAppIndiv = indiv_currentFeat['previousAppCounts'].values[0]
 longestAppIndiv = indiv_currentFeat['CNT_PAYMENT_max'].values[0]
 longestRemainIndiv = indiv_currentFeat['CNT_INSTALMENT_FUTURE_min_max'].values[0]
 maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
 scoreIndiv = np.round(model.predict_proba(indiv_currentFeatSelect)[0][1]*100,1)
+repaidStatus = application_Xy.loc[:,'TARGET'][indexIndiv]
 
 usage = st.radio(
      'What are you looking for ?',
      ('Description', 'Comparison'))
      
 
-"""if usage == 'Comparison':
+if usage == 'Comparison':
 
     criteria = st.multiselect(
     'Which criteria the subsample should have in common with the selected client ?',
@@ -108,8 +109,8 @@ usage = st.radio(
 
     col2_2_1, col2_2_2, col2_2_3  = st.columns(3)
 
-    #latePaySample = np.round(applicationFeat['LATE_sum_prev_sum'].mean())
-    #col2_2_1.metric('Total late Payments', latePayIndiv, delta = latePayIndiv - latePaySample)
+    previousAppSample = np.round(applicationFeat['previousAppCounts'].mean())
+    col2_2_1.metric('Number of previous Applications', previousAppIndiv, delta = previousAppIndiv - previousAppSample)
     
     longestAppSample = np.round(applicationFeat['CNT_PAYMENT_max'].mean())
     col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv), delta = '{longestAppDelta} d'.format(longestAppDelta = longestAppIndiv-longestAppSample))
@@ -150,7 +151,7 @@ elif usage == 'Description':
 
     col2_2_1, col2_2_2, col2_2_3  = st.columns(3)
 
-    #col2_2_1.metric('Total late Payments', latePayIndiv)
+    col2_2_1.metric('Number of previous Applications', previousAppIndiv)
 
     col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv))
 
@@ -172,17 +173,19 @@ col3_1, col3_2 = st.columns(2)
 
 col3_1.metric('Score',  '{score}%'.format(score = scoreIndiv))
 
-st.subheader(subheader3_2)"""
+col3_2.metric ('Repaid status', repaidStatus)
+
+st.subheader(subheader3_2)
 
 shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
 
 st.pyplot(shapPlot)
 
-#if scoreIndiv >= 50:
-nbVar = len(varContribNeg)
-var = [var[0] for var in varContribNeg]
-print(var)
-nbPlot = 0
-while nbPlot < min(nbVar,3):
-    st.pyplot(dataAnalysis.kde_target(var[nbPlot],application_Xy, indexIndiv))
-    nbPlot+=1
+if scoreIndiv >= 35:
+    nbVar = len(varContribNeg)
+    var = [var[0] for var in varContribNeg]
+    print(var)
+    nbPlot = 0
+    while nbPlot < min(nbVar,3):
+        st.pyplot(dataAnalysis.kde_target(var[nbPlot],application_Xy, indexIndiv))
+        nbPlot+=1
