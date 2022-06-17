@@ -9,7 +9,7 @@ numpy
 scipy
 imblearn
 lightgbm
-skopt
+scikit-optimize
 sklearn
 boruta
 streamlit
