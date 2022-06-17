@@ -1,13 +1,19 @@
+import csv
 import pandas as pd 
+import requests
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
+NGROK_URL = "https://11e7-93-121-168-240.ngrok.io/"
 
-def loadData(csvName, index_column = False):
-    if index_column:
-        return(pd.read_csv(csvName, index_col=0))
-    else:
-        return(pd.read_csv(csvName))
+def loadData(csvName, _id:int = -1, index_row:int = -1):
+    url = NGROK_URL+"data?df_name="+csvName
+    resp = requests.get(url)
+    df = pd.read_json(resp.json(),orient ='split')
+    if _id != -1:
+        return(df[df['SK_ID_CURR']==_id])
+    else :
+        return(df.iloc[index_row,:])
 
 
 def mylist (df, columnFilter, columnValue, columnResult):

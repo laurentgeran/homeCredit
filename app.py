@@ -5,13 +5,8 @@ import streamlit as st
 import pickle
 import dataAnalysis
 import interpret
-import requests
 
-url = "https://7698-93-121-168-240.ngrok.io/data?df_name=HomeCredit_columns_description.csv"
 
-resp = requests.get(url)
-df = pd.read_json(resp.json(),orient ='split')
-print(df.head())
 
 
 
@@ -23,14 +18,15 @@ header3 = 'Score and interpretation'
 subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
-applicationInit = dataAnalysis.loadData('data/application_train.csv')
+
+"""applicationInit = dataAnalysis.loadData('data/application_train.csv')
 applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')
 application_y = dataAnalysis.loadData('applicationTrain_y.csv')
 applicationFeatSelect = dataAnalysis.loadData('featSelectTrain_X.csv',True)
 previousApplication = dataAnalysis.loadData('data/previous_application.csv')
 installmentsPayments = dataAnalysis.loadData('data/installments_payments.csv')
 
-application_Xy = applicationFeatSelect.join(application_y)
+application_Xy = applicationFeatSelect.join(application_y)"""
 
 with open(r"clf_feat_over.pkl", "rb") as input_file:
     model = pickle.load(input_file)
@@ -42,6 +38,9 @@ SK_ID_CURR = int(st.text_input('Please enter a SK_ID_CURR', '100002'))
 st.write('The entered SK_ID_CURR is', str(SK_ID_CURR))
 
 st.header(header2)
+
+indiv_currentInittest = dataAnalysis.loadData("application_train.csv",SK_ID_CURR)
+print(indiv_currentInittest)
 
 indiv_currentInit = applicationInit[applicationInit['SK_ID_CURR']==SK_ID_CURR]
 indiv_currentFeat = applicationFeat[applicationFeat['SK_ID_CURR']==SK_ID_CURR]
