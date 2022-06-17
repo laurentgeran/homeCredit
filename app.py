@@ -1,10 +1,17 @@
 #streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/app.py
 import numpy as np
-
+import pandas as pd
 import streamlit as st
 import pickle
 import dataAnalysis
 import interpret
+import requests
+
+url = "https://7698-93-121-168-240.ngrok.io/data?df_name=HomeCredit_columns_description.csv"
+
+resp = requests.get(url)
+df = pd.read_json(resp.json(),orient ='split')
+print(df.head())
 
 
 
