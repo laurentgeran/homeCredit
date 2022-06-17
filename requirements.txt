@@ -2,8 +2,8 @@ uvicorn
 fastapi
 pydantic
 pandas 
-plotly.graph_objects
-matplotlib.pyplot
+plotly
+matplotlib
 shap
 numpy
 scipy
