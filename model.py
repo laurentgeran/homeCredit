@@ -1,78 +1,31 @@
-import os
-import time
-import gc
-from tqdm import tqdm
-import datetime
-from dateutil import relativedelta
-from datetime import timedelta
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
-import seaborn as sns
-import statistics
-import scipy
-import random
-import math
-import sklearn
-import re
-
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.compose import ColumnTransformer
 
 # Preprocess
 from scipy.stats.mstats import winsorize
-from sklearn.preprocessing import Binarizer
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder
-from category_encoders.target_encoder import TargetEncoder 
-from category_encoders.leave_one_out import LeaveOneOutEncoder
-from sklearn.preprocessing import RobustScaler
 
 # Sampling
 from imblearn.over_sampling import SMOTE 
 
-# Viz
-from sklearn.decomposition import PCA
-
 # Modeling
-from sklearn.dummy import DummyRegressor
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
 from lightgbm import LGBMClassifier
 
 # Hyperparameters 
-from skopt.space import Integer
-from skopt.space import Real
 from skopt.utils import use_named_args
 from skopt import gp_minimize
  
 # Model selection
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_validate
-from sklearn.model_selection import cross_val_score, cross_val_predict
-from sklearn.model_selection import KFold, StratifiedKFold
 
 # Metrics
 from sklearn.metrics import make_scorer
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 
 # Feature selection
 from boruta import BorutaPy
-from sklearn.feature_selection import RFE
-from sklearn.feature_selection import RFECV
-
-# Interpretation
-import shap
 
 # Serialization
 import pickle

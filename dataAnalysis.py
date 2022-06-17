@@ -68,11 +68,11 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
 def kde_target(var_name, df, index):
     
     # Calculate the correlation coefficient between the new variable and the target
-    corr = df['TARGET'].corr(df[var_name])
+    #corr = df['TARGET'].corr(df[var_name])
     
     # Calculate medians for repaid vs not repaid
-    avg_repaid = df.loc[df['TARGET'] == 0, var_name].median()
-    avg_not_repaid = df.loc[df['TARGET'] == 1, var_name].median()
+    #avg_repaid = df.loc[df['TARGET'] == 0, var_name].median()
+    #avg_not_repaid = df.loc[df['TARGET'] == 1, var_name].median()
     
     repaid = df.loc[df['TARGET'] == 0, var_name]
     notRepaid = df.loc[df['TARGET'] == 1, var_name]

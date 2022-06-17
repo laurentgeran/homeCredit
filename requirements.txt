@@ -1,0 +1,16 @@
+uvicorn 
+pickle
+fastapi
+pydantic
+pandas 
+plotly.graph_objects
+matplotlib.pyplot
+shap
+numpy
+scipy
+imblearn
+lightgbm
+skopt
+sklearn
+boruta
+streamlit
