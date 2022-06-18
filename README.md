@@ -91,3 +91,48 @@ For open source projects, say how it is licensed.
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
 "# streamlit-to-heroku-tutorial" 
+
+import uvicorn 
+import sqlite3
+import json
+from fastapi import FastAPI
+
+
+# creating file path
+DB_FILE = 'D:\projects\openclassrooms\projets\P7_geran_laurent\homecredit_data\db.db'
+
+# create the app
+app = FastAPI()
+
+@app.get('/')
+def home():
+    return({'message':'Hello world !'})
+
+@app.get('/data')
+def data(table,id):
+    # create a SQL connection to our SQLite database
+    con = sqlite3.connect(DB_FILE)
+    # creating cursor
+    cur = con.cursor()
+    # reading all table names
+    cur.execute("SELECT rowid,* FROM {TABLE} WHERE {VARIABLE} = {VALUE}".format(TABLE = table, VARIABLE= 'SK_ID_CURR', VALUE = id))
+    columns = cur.description 
+    result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
+    # Be sure to close the connection
+    con.close()
+    return(json.dumps(result))
+
+    
+
+@app.post('/predict')
+def predict_score():
+    return()
+
+# run the api
+if __name__== '__main__':
+    uvicorn.run(app, host='127.0.0.1', port=8000)
+
+#uvicorn  dataAPI:app --reload
+#ngrok http 8000
+
+
