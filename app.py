@@ -33,18 +33,16 @@ with open(r"clf_feat_over.pkl", "rb") as input_file:
 
 st.header(header1)
 
-SK_ID_CURR = int(st.text_input('Please enter a SK_ID_CURR', '100002'))
+SK_ID_CURR = int(st.text_input('Please enter a SK_ID_CURR', '100003'))
 
 st.write('The entered SK_ID_CURR is', str(SK_ID_CURR))
 
 st.header(header2)
 
-indiv_currentInittest = dataAnalysis.loadData("application_train.csv",SK_ID_CURR)
-print(indiv_currentInittest)
-
-indiv_currentInit = applicationInit[applicationInit['SK_ID_CURR']==SK_ID_CURR]
-indiv_currentFeat = applicationFeat[applicationFeat['SK_ID_CURR']==SK_ID_CURR]
+indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR)
+indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
 indexIndiv = indiv_currentFeat.index.values[0]
+indiv_currentFeatSelect = np.array(dataAnalysis.loadData(table='featSelectTrain_X',index = indexIndiv)).reshape(1, -1)
 indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
 
 

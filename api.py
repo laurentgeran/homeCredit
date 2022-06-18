@@ -3,8 +3,6 @@ import pickle
 import application
 from fastapi import FastAPI
 
-
-
 # create the app
 app = FastAPI()
 
