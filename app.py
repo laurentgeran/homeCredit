@@ -16,10 +16,10 @@ subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
 
-applicationInit = dataAnalysis.loadData(table='application_train')
+applicationInit = dataAnalysis.loadData(table='application_train', index=False)
 applicationFeat = dataAnalysis.loadData(table='applicationTrain_X')
-previousApplication = dataAnalysis.loadData(table='previous_application')
-installmentsPayments = dataAnalysis.loadData('installments_payments')
+previousApplication = dataAnalysis.loadData(table='previous_application', index=False)
+installmentsPayments = dataAnalysis.loadData('installments_payments', index=False)
 
 """applicationInit = dataAnalysis.loadData('data/application_train.csv')
 applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')

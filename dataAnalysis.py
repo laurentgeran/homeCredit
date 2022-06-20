@@ -3,12 +3,15 @@ import requests
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-NGROK_URL = "https://252b-93-121-168-240.ngrok.io/"
+NGROK_URL = 'http://709f-93-121-168-240.ngrok.io'
 
-def loadData(table, id:int = -1):
-    url = NGROK_URL+"data?table="+table+"&id="+str(id)
+def loadData(table, id:int = -1, index = False):
+    url = NGROK_URL+"/data?table="+table+"&id="+str(id)
     resp = requests.get(url)
-    df = pd.read_json(resp.json(),orient ='records').set_index('index')
+    if index : 
+        df = pd.read_json(resp.json(),orient ='records').set_index('index')
+    else : 
+        df = pd.read_json(resp.json(),orient ='records').set_index('rowid')
     print(df)
     return(df)
 
