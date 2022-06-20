@@ -8,15 +8,15 @@ DB_FILE = 'D:\projects\openclassrooms\projets\P7_geran_laurent\homecredit_data\d
 
 # creating cursor
 con = sqlite3.connect(DB_FILE)
-cur = con.cursor()
+#cur = con.cursor()
 
-applicationTrain = preproFunc.localLoad('application_train', cur)
-#applicationTest = preproFunc.localLoad('application_test', cur)
+applicationTrain = preproFunc.localLoad('application_train', con)
+#applicationTest = preproFunc.localLoad('application_test', con)
 
-previousApplication = preproFunc.localLoad('previous_application', cur)
+previousApplication = preproFunc.localLoad('previous_application', con)
 
 # posCashBalance
-posCashBalance = preproFunc.localLoad('POS_CASH_balance', cur)
+posCashBalance = preproFunc.localLoad('POS_CASH_balance', con)
 
 posCashBalance['LATE_PAYMENT'] = posCashBalance['SK_DPD'] > 0.0
 posCashBalance['INSTALLMENTS_PAID'] = posCashBalance['CNT_INSTALMENT'] - posCashBalance['CNT_INSTALMENT_FUTURE']
@@ -27,7 +27,7 @@ del posCashBalance
 gc.collect()
 
 # instalmentsPayments
-instalmentsPayments = preproFunc.localLoad('installments_payments', cur)
+instalmentsPayments = preproFunc.localLoad('installments_payments', con)
 
 instalmentsPayments['LATE'] = instalmentsPayments['DAYS_ENTRY_PAYMENT'] > instalmentsPayments['DAYS_INSTALMENT']
 instalmentsPayments['LOW_PAYMENT'] = instalmentsPayments['AMT_PAYMENT'] < instalmentsPayments['AMT_INSTALMENT']
@@ -38,7 +38,7 @@ del instalmentsPayments
 gc.collect()
 
 # creditCardBalance
-creditCardBalance = preproFunc.localLoad('credit_card_balance', cur)
+creditCardBalance = preproFunc.localLoad('credit_card_balance', con)
 
 creditCardBalance['OVER_LIMIT'] = creditCardBalance['AMT_BALANCE'] > creditCardBalance['AMT_CREDIT_LIMIT_ACTUAL']
 creditCardBalance['BALANCE_CLEARED'] = creditCardBalance['AMT_BALANCE'] == 0.0
@@ -62,12 +62,12 @@ del previousApplication
 gc.collect()
 
 ##
-bureau = preproFunc.localLoad('bureau', cur)
+bureau = preproFunc.localLoad('bureau', con)
 
 bureau['LOAN_RATE'] = bureau['AMT_ANNUITY'] / bureau['AMT_CREDIT_SUM']
 
 # bureauBalance
-bureauBalance = preproFunc.localLoad('bureau_balance', cur)
+bureauBalance = preproFunc.localLoad('bureau_balance', con)
 
 bureauBalance['PAST_DUE'] = bureauBalance['STATUS'].isin(['1', '2', '3', '4', '5'])
 bureauBalance['ON_TIME'] = bureauBalance['STATUS'] == '0'
@@ -99,6 +99,10 @@ applicationTrain['AMT_REQ_SUM'] = applicationTrain[[x for x in applicationTrain.
 applicationTrain=preproFunc.preprocess(applicationTrain)
 applicationTrain_y=applicationTrain["TARGET"]
 applicationTrain_X=applicationTrain.drop(columns=["TARGET"])
+
+applicationTrain.to_sql('applicationTrain', con)
+applicationTrain_y.to_sql('applicationTrain_y', con)
+applicationTrain_X.to_sql('applicationTrain_X', con)
 
 con.close()
 

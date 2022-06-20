@@ -1,12 +1,9 @@
 #streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/app.py
 import numpy as np
-import pandas as pd
 import streamlit as st
 import pickle
 import dataAnalysis
 import interpret
-
-
 
 
 
@@ -18,6 +15,11 @@ header3 = 'Score and interpretation'
 subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
+
+applicationInit = dataAnalysis.loadData(table='application_train')
+applicationFeat = dataAnalysis.loadData(table='applicationTrain_X')
+previousApplication = dataAnalysis.loadData(table='previous_application')
+installmentsPayments = dataAnalysis.loadData('installments_payments')
 
 """applicationInit = dataAnalysis.loadData('data/application_train.csv')
 applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')
@@ -42,8 +44,8 @@ st.header(header2)
 indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR)
 indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
 indexIndiv = indiv_currentFeat.index.values[0]
-indiv_currentFeatSelect = np.array(dataAnalysis.loadData(table='featSelectTrain_X',index = indexIndiv)).reshape(1, -1)
-indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
+indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
+#indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
 
 
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
@@ -56,7 +58,7 @@ maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
 scoreIndiv = np.round(model.predict_proba(indiv_currentFeatSelect)[0][1]*100,1)
-repaidStatus = application_Xy.loc[:,'TARGET'][indexIndiv]
+repaidStatus = indiv_currentFeatSelect.loc['TARGET']
 
 usage = st.radio(
      'What are you looking for ?',
@@ -180,7 +182,7 @@ col3_1.metric('Score',  '{score}%'.format(score = scoreIndiv))
 col3_2.metric ('Repaid status', repaidStatus)
 
 st.subheader(subheader3_2)
-
+"""
 shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
 
 st.pyplot(shapPlot)
@@ -192,3 +194,4 @@ if scoreIndiv >= 35:
     while nbPlot < min(nbVar,3):
         st.pyplot(dataAnalysis.kde_target(var[nbPlot],application_Xy, indexIndiv))
         nbPlot+=1
+"""

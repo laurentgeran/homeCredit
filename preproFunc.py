@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import scipy
-import json
 import re
 
 from sklearn.pipeline import Pipeline
@@ -12,12 +11,20 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-def localLoad(table,cursor):
+"""def localLoad(table,cursor):
     cursor.execute("SELECT * FROM "+table)
     columns = cursor.description 
     result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cursor.fetchall()]
     resultJSON = json.dumps(result)
     df = pd.read_json(resultJSON,orient ='records')
+    return (df)"""
+
+def localLoad(table,connection,index=False):
+    query = "SELECT * FROM "+table
+    if index:
+        df = pd.read_sql(query, connection, index_col = 'index')
+    else :
+        df = pd.read_sql(query, connection)
     return (df)
 
 def getVarByTypes(dataframe,listTypes:list):
@@ -113,8 +120,6 @@ def preprocess(dataframe,aggregation=False,_id=np.nan):
 
     numericalTransformer = Pipeline (steps=[('imputer', SimpleImputer(strategy='median'))])
 
-    # add standardScaler
-    
     # Removing variables with too much missing values
     l= len(dataframe)
     dataframe = dataframe.loc[:,(dataframe.isna().sum()/l<0.5).values]
@@ -174,7 +179,7 @@ def preprocess(dataframe,aggregation=False,_id=np.nan):
     
     df = df.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
 
-    print(np.any(np.isnan(df)))
-    print(np.all(np.isfinite(df)))
+    #print(np.any(np.isnan(df)))
+    #print(np.all(np.isfinite(df)))
     
     return (df)

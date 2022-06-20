@@ -5,13 +5,12 @@ import matplotlib.pyplot as plt
 
 NGROK_URL = "https://252b-93-121-168-240.ngrok.io/"
 
-def loadData(table, id:int = -1, index_row:int = -1):
+def loadData(table, id:int = -1):
     url = NGROK_URL+"data?table="+table+"&id="+str(id)
     resp = requests.get(url)
-    df = pd.read_json(resp.json(),orient ='records').set_index('rowid')
+    df = pd.read_json(resp.json(),orient ='records').set_index('index')
     print(df)
     return(df)
-
 
 def mylist (df, columnFilter, columnValue, columnResult):
     return (df[df[columnFilter]==columnValue][columnResult])

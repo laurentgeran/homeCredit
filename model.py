@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
-
-# Preprocess
-from scipy.stats.mstats import winsorize
-
-# Sampling
-from imblearn.over_sampling import SMOTE 
+import sqlite3
+import preproFunc
+import modelFunc
+import warnings
 
 # Modeling
 from lightgbm import LGBMClassifier
@@ -14,73 +12,65 @@ from lightgbm import LGBMClassifier
 from skopt.utils import use_named_args
 from skopt import gp_minimize
  
-# Model selection
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_validate
-
-# Metrics
-from sklearn.metrics import make_scorer
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-
 # Feature selection
 from boruta import BorutaPy
 
 # Serialization
 import pickle
 
-# myFunctions
+# don't display warnings
+warnings.filterwarnings("ignore")
 
-def splitData(X,y):
-    XTrain, XTest, yTrain, yTest = train_test_split(X,y, test_size=0.2)
-    return XTrain, XTest, yTrain, yTest
+# creating file path
+DB_FILE = 'D:\projects\openclassrooms\projets\P7_geran_laurent\homecredit_data\db.db'
 
-def modeling(classifier, X, y, featuresSelected:list= ["All"], overSampling = False):
-    
-    X_=X
-    if featuresSelected[0] != "All":
-        X_=X_.loc[:,featuresSelected]
-    XTrain, XTest, yTrain, yTest=splitData(X_,y)
-    if overSampling:
-        oversampling = SMOTE()
-        XTrain, yTrain = oversampling.fit_resample(XTrain, yTrain)
-    scoring = {"auc": make_scorer(roc_auc_score), "accuracy": make_scorer(accuracy_score)}
-    cv = cross_validate(classifier,XTrain, yTrain , cv=4,scoring = scoring)
-    #print(np.mean(cv["test_auc"]))
-    #print(np.mean(cv["test_accuracy"]))
-    classifier.fit(XTrain, yTrain,eval_metric='auc', eval_set=[(XTest, yTest)])
-    yPred=classifier.predict(XTest)
-    print("classification report : ", classification_report(yTest,yPred))
+# creating cursor
+con = sqlite3.connect(DB_FILE)
+#cur = con.cursor()
 
-    return classifier
+applicationTrain = preproFunc.localLoad('applicationTrain', con, True)
+applicationTrain_y= np.ravel(preproFunc.localLoad('applicationTrain_y', con, True))
+applicationTrain_X= preproFunc.localLoad('applicationTrain_X', con, True).drop(columns=["SK_ID_CURR"])
 
-applicationTrain=pd.read_csv('applicationTrain.csv', index_col = 0)
-applicationTrain_y=np.ravel(pd.read_csv('applicationTrain_y.csv', index_col = 0))
-applicationTrain_X=pd.read_csv('applicationTrain_X.csv', index_col = 0).drop(columns=["SK_ID_CURR"])
+modelFunc.modeling(LGBMClassifier(), applicationTrain_X, applicationTrain_y)
 
-model = modeling(LGBMClassifier(), applicationTrain_X, applicationTrain_y)
-
-with open('clf.pkl', 'wb') as output_file:
-    pickle.dump(model, output_file)
+#with open('clf.pkl', 'wb') as output_file:
+    #pickle.dump(model, output_file)
 
 # random under sampling
-n=len(applicationTrain[applicationTrain["TARGET"]==1])
-dataBaseline=applicationTrain[applicationTrain["TARGET"]==0].sample(n,random_state=0,axis=0)
+n = len(applicationTrain[applicationTrain["TARGET"]==1])
+dataBaseline = applicationTrain[applicationTrain["TARGET"]==0].sample(n,random_state=0,axis=0)
 dataBaseline=dataBaseline.append(applicationTrain[applicationTrain["TARGET"]==1])
 under_y=dataBaseline["TARGET"]
 under_X=dataBaseline.drop(columns=["TARGET","SK_ID_CURR"])
 
+modelFunc.modeling(LGBMClassifier(), under_X, under_y)
+
 # feature selection with BorutaPy
-feat_selector = BorutaPy(LGBMClassifier(num_boost_round = 100), n_estimators='auto', random_state=1)
+feat_selector = BorutaPy(LGBMClassifier(num_boost_round=15), n_estimators='auto', random_state=1)
 feat_selector.fit(under_X.values, under_y.values)
+feat_selected = applicationTrain_X.columns[feat_selector.support_].values.tolist()
+feat_selected.extend(["SK_ID_CURR", "TARGET"])
+
 
 # oversampling using feature selection
-featSelect_X=applicationTrain[applicationTrain_X.columns[feat_selector.support_]]
-featSelect_X.to_csv('featSelectTrain_X.csv')
-modelOver = modeling(LGBMClassifier(), featSelect_X, applicationTrain_y, overSampling = True)
+featSelect=applicationTrain.loc[:,feat_selected]
+featSelect_y = featSelect["TARGET"]
+featSelect_X = featSelect.drop(columns=["TARGET","SK_ID_CURR"])
 
-# Optimisation des hyperparamètres
+featSelect.to_sql('featSelect', con)
+featSelect_y.to_sql('featSelect_y', con)
+featSelect_X.to_sql('featSelect_X', con)
 
-with open('clf_feat_over.pkl', 'wb') as output_file:
+modelOver = modelFunc.modeling(LGBMClassifier(), featSelect_X, applicationTrain_y, overSampling = True)
+
+# optimisation des hyperparamètres
+
+"""
+# saving the model
+with open('homecredit/clf_feat_over.pkl', 'wb') as output_file:
     pickle.dump(modelOver, output_file)
+"""
+
+
+con.close()
