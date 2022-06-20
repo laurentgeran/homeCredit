@@ -16,10 +16,10 @@ subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
 
-applicationInit = dataAnalysis.loadData(table='application_train', index=False)
+"""applicationInit = dataAnalysis.loadData(table='application_train', index=False)
 applicationFeat = dataAnalysis.loadData(table='applicationTrain_X')
 previousApplication = dataAnalysis.loadData(table='previous_application', index=False)
-installmentsPayments = dataAnalysis.loadData('installments_payments', index=False)
+installmentsPayments = dataAnalysis.loadData('installments_payments', index=False)"""
 
 """applicationInit = dataAnalysis.loadData('data/application_train.csv')
 applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')
@@ -41,7 +41,7 @@ st.write('The entered SK_ID_CURR is', str(SK_ID_CURR))
 
 st.header(header2)
 
-indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR)
+indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR, index = False)
 indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
 indexIndiv = indiv_currentFeat.index.values[0]
 indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
