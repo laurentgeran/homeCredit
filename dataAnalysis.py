@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 NGROK_URL = 'http://709f-93-121-168-240.ngrok.io'
 
-def loadData(table, id:int = -1, index = False):
+def loadData(table, id:int = -1, index = True):
     url = NGROK_URL+"/data?table="+table+"&id="+str(id)
     resp = requests.get(url)
     if index : 
