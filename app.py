@@ -45,7 +45,7 @@ indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_C
 indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
 indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
 print(indiv_currentFeatSelect.columns)
-indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=["TARGET","SK_ID_CURR"])
+indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=['TARGET','SK_ID_CURR'])
 #indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
 
 
@@ -59,7 +59,7 @@ maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
 scoreIndiv = np.round(model.predict_proba(indiv_currentFeatSelect_X)[0][1]*100,1)
-repaidStatus = indiv_currentFeatSelect.loc['TARGET']
+repaidStatus = indiv_currentFeatSelect.loc[:,'TARGET']
 
 usage = st.radio(
      'What are you looking for ?',
