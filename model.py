@@ -58,6 +58,10 @@ featSelect=applicationTrain.loc[:,feat_selected]
 featSelect_y = featSelect["TARGET"]
 featSelect_X = featSelect.drop(columns=["TARGET","SK_ID_CURR"])
 
+con.cursor().execute("DROP TABLE IF EXISTS featSelect")
+con.cursor().execute("DROP TABLE IF EXISTS featSelect_y")
+con.cursor().execute("DROP TABLE IF EXISTS featSelect_X")
+
 featSelect.to_sql('featSelect', con)
 featSelect_y.to_sql('featSelect_y', con)
 featSelect_X.to_sql('featSelect_X', con)
@@ -66,11 +70,9 @@ modelOver = modelFunc.modeling(LGBMClassifier(), featSelect_X, applicationTrain_
 
 # optimisation des hyperparamètres
 
-"""
 # saving the model
 with open('homecredit/clf_feat_over.pkl', 'wb') as output_file:
     pickle.dump(modelOver, output_file)
-"""
 
 
 con.close()
