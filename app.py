@@ -53,7 +53,7 @@ loanRateIndiv = np.round(indiv_currentFeat['LOAN_RATE'].values[0]*100,3)
 telAgeIndiv = np.floor(-indiv_currentFeat['DAYS_LAST_PHONE_CHANGE'].values[0]/365.5)
 previousAppIndiv = indiv_currentFeat['previousAppCounts'].values[0]
 longestAppIndiv = indiv_currentFeat['CNT_PAYMENT_max'].values[0]
-longestRemainIndiv = indiv_currentFeat['CNT_INSTALMENT_FUTURE_min_max'].values[0]
+#longestRemainIndiv = indiv_currentFeat['CNT_INSTALMENT_FUTURE_min_max'].values[0]
 maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
@@ -64,7 +64,6 @@ usage = st.radio(
      'What are you looking for ?',
      ('Description', 'Comparison'))
      
-
 if usage == 'Comparison':
 
     criteria = st.multiselect(
@@ -72,22 +71,17 @@ if usage == 'Comparison':
     ['Gender', 'Age', 'Family status','Car ownership'])
 
     if 'Gender' in criteria:
-        gender = indiv_currentFeat['x1_F'].values[0]
-        applicationFeat = applicationFeat[applicationFeat['x1_F']==gender]
-    
-    if 'Age' in criteria:
-        age = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
-        applicationFeat = applicationFeat[np.floor(-applicationFeat['DAYS_BIRTH']/365.5)==age]
+        gender = indiv_currentInit['CODE_GENDER'].values[0]
+    else : 
+        gender = -1
 
     if 'Family status' in criteria:
         family = indiv_currentInit['NAME_FAMILY_STATUS'].values[0]
-        indexes = applicationInit[applicationInit['NAME_FAMILY_STATUS']==family].index
-        applicationFeat = applicationFeat.filter(items = indexes, axis=0)
-    
-    if 'Car ownership' in criteria:
-        car = indiv_currentInit['FLAG_OWN_CAR'].values[0]
-        indexes = applicationInit[applicationInit['FLAG_OWN_CAR']==car].index
-        applicationFeat = applicationFeat.filter(items = indexes, axis=0)
+    else : 
+        family = -1
+
+    applicationFeat = dataAnalysis.loadDataIndexes(table='applicationTrain', gender = gender, family = family)
+    print(applicationFeat)
 
     st.write('You selected the following similitude criteria:', criteria)
 
