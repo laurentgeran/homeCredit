@@ -43,7 +43,6 @@ st.header(header2)
 
 indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR, index = False)
 indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
-indexIndiv = indiv_currentFeat.index.values[0]
 indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
 print(indiv_currentFeatSelect.columns)
 indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=["TARGET","SK_ID_CURR"])

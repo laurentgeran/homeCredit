@@ -11,7 +11,7 @@ def loadData(table, id:int = -1, index = True):
     if index : 
         df = pd.read_json(resp.json(),orient ='records').set_index('index')
     else : 
-        df = pd.read_json(resp.json(),orient ='records').set_index('rowid')
+        df = pd.read_json(resp.json(),orient ='records')
     return(df)
 
 def loadDataIndexes(table, gender, age, family, car, id:int = -1, index = True):
