@@ -69,19 +69,20 @@ if usage == 'Comparison':
 
     criteria = st.multiselect(
     'Which criteria the subsample should have in common with the selected client ?',
-    ['Gender', 'Age', 'Family status','Car ownership'])
+    ['Gender', 'Family status'])
 
     if 'Gender' in criteria:
-        gender = indiv_currentInit['CODE_GENDER'].values[0]
+        gen = indiv_currentInit['CODE_GENDER'].values[0]
     else : 
-        gender = -1
+        gen = -1
 
     if 'Family status' in criteria:
-        family = indiv_currentInit['NAME_FAMILY_STATUS'].values[0]
+        fam = indiv_currentInit['NAME_FAMILY_STATUS'].values[0]
     else : 
-        family = -1
+        fam = -1
 
-    applicationFeat = dataAnalysis.loadDataIndexes(table='applicationTrain', gender = gender, family = family)
+    applicationFeat = dataAnalysis.loadDataIndexes(table='applicationTrain', gender = gen, family = fam)
+
     print(applicationFeat)
 
     st.write('You selected the following similitude criteria:', criteria)
