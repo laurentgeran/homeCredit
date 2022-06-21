@@ -1,4 +1,5 @@
 #streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/app.py
+from email.policy import default
 import numpy as np
 import streamlit as st
 import pickle
@@ -44,9 +45,7 @@ st.header(header2)
 indiv_currentInit = dataAnalysis.loadData(table='application_train',id = SK_ID_CURR, index = False)
 indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_CURR)
 indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
-print(indiv_currentFeatSelect.columns)
 indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=['TARGET','SK_ID_CURR'])
-#indiv_currentFeatSelect = np.array(applicationFeatSelect.iloc[indexIndiv,:]).reshape(1, -1)
 
 
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
@@ -69,7 +68,7 @@ if usage == 'Comparison':
 
     criteria = st.multiselect(
     'Which criteria the subsample should have in common with the selected client ?',
-    ['Gender', 'Family status'])
+    ['Gender', 'Family status'],default=['Gender','Family status'])
 
     if 'Gender' in criteria:
         gen = indiv_currentInit['CODE_GENDER'].values[0]
@@ -81,9 +80,8 @@ if usage == 'Comparison':
     else : 
         fam = -1
 
-    applicationFeat = dataAnalysis.loadDataIndexes(table='applicationTrain', gender = gen, family = fam)
+    applicationFeat = dataAnalysis.loadDataIndexes(table='application_train', gender = gen, family = fam, index = False)
 
-    print(applicationFeat)
 
     st.write('You selected the following similitude criteria:', criteria)
 
@@ -117,8 +115,8 @@ if usage == 'Comparison':
     longestAppSample = np.round(applicationFeat['CNT_PAYMENT_max'].mean())
     col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv), delta = '{longestAppDelta} d'.format(longestAppDelta = longestAppIndiv-longestAppSample))
 
-    longestRemainSample = np.round(applicationFeat['CNT_INSTALMENT_FUTURE_min_max'].mean())
-    col2_2_3.metric('Longest Remaining Installments', longestRemainIndiv, delta = longestRemainIndiv - longestRemainSample)
+    #longestRemainSample = np.round(applicationFeat['CNT_INSTALMENT_FUTURE_min_max'].mean())
+    #col2_2_3.metric('Longest Remaining Installments', longestRemainIndiv, delta = longestRemainIndiv - longestRemainSample)
 
     col2_2_4, col2_2_5  = st.columns(2)
 
@@ -128,7 +126,7 @@ if usage == 'Comparison':
     lastDecisionSample = np.round(-applicationFeat['DAYS_DECISION_min'].mean())
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv), delta = '{lastDecisionDelta} d'.format(lastDecisionDelta = lastDecisionIndiv-lastDecisionSample))
 
-    st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width=True)
+    #st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width=True)
 
 elif usage == 'Description':
 
@@ -157,7 +155,7 @@ elif usage == 'Description':
 
     col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv))
 
-    col2_2_3.metric('Longest Remaining Installments', longestRemainIndiv)
+    #col2_2_3.metric('Longest Remaining Installments', longestRemainIndiv)
 
     col2_2_4, col2_2_5  = st.columns(2)
 
@@ -165,7 +163,12 @@ elif usage == 'Description':
 
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv))
 
-    st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width= True)
+    #st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width= True)
+
+previousApplication = dataAnalysis.loadData('previous_application', SK_ID_CURR, index = False)
+installmentsPayments = dataAnalysis.loadData('installments_payments', SK_ID_CURR, index = False)
+
+st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width=True)
 
 st.header(header3)
 

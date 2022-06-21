@@ -3,7 +3,7 @@ import requests
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-NGROK_URL = 'http://709f-93-121-168-240.ngrok.io'
+NGROK_URL = 'http://fc94-93-121-168-240.ngrok.io'
 
 def loadData(table, id:int = -1, index = True):
     url = NGROK_URL+"/data?table="+table+"&id="+str(id)
@@ -20,7 +20,7 @@ def loadDataIndexes(table, gender, family, id:int = -1, index = True):
     if index : 
         df = pd.read_json(resp.json(),orient ='records').set_index('index')
     else : 
-        df = pd.read_json(resp.json(),orient ='records').set_index('rowid')
+        df = pd.read_json(resp.json(),orient ='records')
     return(df)
 
 def mylist (df, columnFilter, columnValue, columnResult):
