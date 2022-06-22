@@ -1,10 +1,12 @@
-#streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/app.py
-from email.policy import default
+#streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/streamlitApp.py
 import numpy as np
 import streamlit as st
 import pickle
+import requests
+import json
 import dataAnalysis
 import interpret
+
 
 
 
@@ -16,23 +18,7 @@ header3 = 'Score and interpretation'
 subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
-
-"""applicationInit = dataAnalysis.loadData(table='application_train', index=False)
-applicationFeat = dataAnalysis.loadData(table='applicationTrain_X')
-previousApplication = dataAnalysis.loadData(table='previous_application', index=False)
-installmentsPayments = dataAnalysis.loadData('installments_payments', index=False)"""
-
-"""applicationInit = dataAnalysis.loadData('data/application_train.csv')
-applicationFeat = dataAnalysis.loadData('applicationTrain_X.csv')
-application_y = dataAnalysis.loadData('applicationTrain_y.csv')
-applicationFeatSelect = dataAnalysis.loadData('featSelectTrain_X.csv',True)
-previousApplication = dataAnalysis.loadData('data/previous_application.csv')
-installmentsPayments = dataAnalysis.loadData('data/installments_payments.csv')
-
-application_Xy = applicationFeatSelect.join(application_y)"""
-
-with open(r"clf_feat_over.pkl", "rb") as input_file:
-    model = pickle.load(input_file)
+url_modelAPI = "http://127.0.0.1:4000/predict"
 
 st.header(header1)
 
@@ -47,6 +33,8 @@ indiv_currentFeat = dataAnalysis.loadData(table='applicationTrain_X',id = SK_ID_
 indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CURR)
 indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=['TARGET','SK_ID_CURR'])
 
+payload = json.dumps(indiv_currentFeatSelect_X.to_dict('r')[0])
+scoreIndiv = np.round(requests.request("POST", url_modelAPI, data=payload).json()['prediction']*100,1)
 
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
 loanRateIndiv = np.round(indiv_currentFeat['LOAN_RATE'].values[0]*100,3)
@@ -57,7 +45,6 @@ longestAppIndiv = indiv_currentFeat['CNT_PAYMENT_max'].values[0]
 maxChangeIndiv = indiv_currentFeat['NUM_INSTALMENT_VERSION_max_max'].values[0]
 lastDecisionIndiv = -indiv_currentFeat['DAYS_DECISION_min'].values[0]
 
-scoreIndiv = np.round(model.predict_proba(indiv_currentFeatSelect_X)[0][1]*100,1)
 repaidStatus = indiv_currentFeatSelect.loc[:,'TARGET']
 
 usage = st.radio(

@@ -13,3 +13,5 @@ scikit-optimize
 sklearn
 boruta
 streamlit
+request
+json
