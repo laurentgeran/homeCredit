@@ -1,11 +1,11 @@
 #streamlit run d:/projects/openclassrooms/projets/P7_geran_laurent/homecredit/streamlitApp.py
 import numpy as np
 import streamlit as st
-import pickle
+import matplotlib.pyplot as plt
 import requests
 import json
+import shap
 import dataAnalysis
-import interpret
 
 
 
@@ -18,7 +18,7 @@ header3 = 'Score and interpretation'
 subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
-url_modelAPI = "http://127.0.0.1:4000/predict"
+url_modelAPI_predict = "http://127.0.0.1:4000/predict"
 
 st.header(header1)
 
@@ -34,7 +34,7 @@ indiv_currentFeatSelect = dataAnalysis.loadData(table='featSelect',id = SK_ID_CU
 indiv_currentFeatSelect_X=indiv_currentFeatSelect.drop(columns=['TARGET','SK_ID_CURR'])
 
 payload = json.dumps(indiv_currentFeatSelect_X.to_dict('r')[0])
-scoreIndiv = np.round(requests.request("POST", url_modelAPI, data=payload).json()['prediction']*100,1)
+scoreIndiv = np.round(requests.request("POST", url_modelAPI_predict, data=payload).json()['prediction']*100,1)
 
 ageIndiv = np.floor(-indiv_currentFeat['DAYS_BIRTH'].values[0]/365.5)
 loanRateIndiv = np.round(indiv_currentFeat['LOAN_RATE'].values[0]*100,3)
@@ -113,8 +113,6 @@ if usage == 'Comparison':
     lastDecisionSample = np.round(-applicationFeat['DAYS_DECISION_min'].mean())
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv), delta = '{lastDecisionDelta} d'.format(lastDecisionDelta = lastDecisionIndiv-lastDecisionSample))
 
-    #st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width=True)
-
 elif usage == 'Description':
 
     st.subheader(subheader2_1)
@@ -150,8 +148,6 @@ elif usage == 'Description':
 
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv))
 
-    #st.plotly_chart(dataAnalysis.plotHistory(SK_ID_CURR,previousApplication,installmentsPayments), use_container_width= True)
-
 previousApplication = dataAnalysis.loadData('previous_application', SK_ID_CURR, index = False)
 installmentsPayments = dataAnalysis.loadData('installments_payments', SK_ID_CURR, index = False)
 
@@ -168,12 +164,28 @@ col3_1.metric('Score',  '{score}%'.format(score = scoreIndiv))
 col3_2.metric ('Repaid status', repaidStatus)
 
 st.subheader(subheader3_2)
-"""
-shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
+
+url_modelAPI_shap = "http://127.0.0.1:4000/shap?SK_ID_CURR="+str(SK_ID_CURR)
+
+test = requests.request("GET", url_modelAPI_shap)
+
+response = json.loads(test.json())
+
+shap_values = np.array(response[0])
+colums = response[1]
+varContribNeg = response[2]
+
+shap.bar_plot(shap_values,feature_names=colums,show=False)
+plt.title("Contributions of the 7 more impactful variables")
+shapPlot = plt.gcf()
 
 st.pyplot(shapPlot)
 
-if scoreIndiv >= 35:
+
+"""
+shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
+
+if scoreIndiv >= 30:
     nbVar = len(varContribNeg)
     var = [var[0] for var in varContribNeg]
     nbPlot = 0

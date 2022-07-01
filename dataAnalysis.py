@@ -2,8 +2,9 @@ import pandas as pd
 import requests
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+import shap
 
-NGROK_URL = 'http://67b2-93-121-168-240.ngrok.io'
+NGROK_URL = 'http://b5bc-78-123-85-16.ngrok.io'
 
 def loadData(table, id:int = -1, index = True):
     url = NGROK_URL+"/data?table="+table+"&id="+str(id)
