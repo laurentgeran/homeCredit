@@ -7,9 +7,6 @@ import json
 import shap
 import dataAnalysis
 
-
-
-
 header1 = 'Client Selection'
 header2 = 'Description or Comparison'
 subheader2_1 = 'Situation at Application'
@@ -67,8 +64,7 @@ if usage == 'Comparison':
     else : 
         fam = -1
 
-    applicationFeat = dataAnalysis.loadDataIndexes(table='application_train', gender = gen, family = fam, index = False)
-
+    applicationFeat = dataAnalysis.loadDataCross(table='application_train', gender = gen, family = fam, index = False)
 
     st.write('You selected the following similitude criteria:', criteria)
 
@@ -81,36 +77,36 @@ if usage == 'Comparison':
     else :
         col2_1_1.metric('Gender', 'F')
 
-    ageSample = np.floor(-applicationFeat['DAYS_BIRTH'].mean()/365.5)
+    ageSample = np.floor(-applicationFeat['daysBirth_avg'].values[0]/365.5)
     col2_1_2.metric('Age', '{age} y'.format(age = ageIndiv), delta = '{ageDelta} y'.format(ageDelta = ageIndiv- ageSample))
 
     col2_1_3, col2_1_4 = st.columns(2)
 
-    loanRateSample = np.round(applicationFeat['LOAN_RATE'].mean()*100,3)
+    loanRateSample = np.round(applicationFeat['loanRate_avg'].values[0]*100,3)
     col2_1_3.metric('Loan Rate', '{loanRate}%'.format(loanRate = loanRateIndiv), delta = '{loanRateDelta} percentage point'.format(loanRateDelta = np.round(loanRateIndiv- loanRateSample,2)))
 
-    telAgeSample = np.floor(-applicationFeat['DAYS_LAST_PHONE_CHANGE'].mean()/365.5)
+    telAgeSample = np.floor(-applicationFeat['daysLastPhoneChange_avg'].values[0]/365.5)
     col2_1_4.metric('Telephone Age',  '{telAge} y'.format(telAge = telAgeIndiv), delta = '{telAgeDelta} y'.format(telAgeDelta = telAgeIndiv- telAgeSample))
 
     st.subheader(subheader2_2)
 
     col2_2_1, col2_2_2, col2_2_3  = st.columns(3)
 
-    previousAppSample = np.round(applicationFeat['previousAppCounts'].mean())
+    previousAppSample = np.round(applicationFeat['previousAppCount_avg'].values[0])
     col2_2_1.metric('Number of previous Applications', previousAppIndiv, delta = previousAppIndiv - previousAppSample)
     
-    longestAppSample = np.round(applicationFeat['CNT_PAYMENT_max'].mean())
-    col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv), delta = '{longestAppDelta} d'.format(longestAppDelta = longestAppIndiv-longestAppSample))
+    longestAppSample = np.round(applicationFeat['cntPaymentMax_avg'].values[0])
+    col2_2_2.metric('Longest Application', '{longestApp} m'.format(longestApp = longestAppIndiv), delta = '{longestAppDelta} m'.format(longestAppDelta = longestAppIndiv-longestAppSample))
 
     #longestRemainSample = np.round(applicationFeat['CNT_INSTALMENT_FUTURE_min_max'].mean())
     #col2_2_3.metric('Longest Remaining Installments', longestRemainIndiv, delta = longestRemainIndiv - longestRemainSample)
 
     col2_2_4, col2_2_5  = st.columns(2)
 
-    maxChangeSample = np.round(applicationFeat['NUM_INSTALMENT_VERSION_max_max'].mean())
+    maxChangeSample = np.round(applicationFeat['numInstalVersionMaxMax_avg'].values[0])
     col2_2_4.metric('Max Changes in Installment calendar', maxChangeIndiv, delta = maxChangeIndiv - maxChangeSample)
 
-    lastDecisionSample = np.round(-applicationFeat['DAYS_DECISION_min'].mean())
+    lastDecisionSample = np.round(-applicationFeat['daysDecisionMin_avg'].values[0])
     col2_2_5.metric('Days since first decision', '{lastDecision} d'.format(lastDecision = lastDecisionIndiv), delta = '{lastDecisionDelta} d'.format(lastDecisionDelta = lastDecisionIndiv-lastDecisionSample))
 
 elif usage == 'Description':
@@ -181,15 +177,4 @@ shapPlot = plt.gcf()
 
 st.pyplot(shapPlot)
 
-
-"""
-shapPlot, varContribNeg = interpret.shapBarPlot(model,applicationFeatSelect,indexIndiv)
-
-if scoreIndiv >= 30:
-    nbVar = len(varContribNeg)
-    var = [var[0] for var in varContribNeg]
-    nbPlot = 0
-    while nbPlot < min(nbVar,3):
-        st.pyplot(dataAnalysis.kde_target(var[nbPlot],application_Xy, indexIndiv))
-        nbPlot+=1
-"""
+st.pyplot(dataAnalysis.kde_target(scoreIndiv,varContribNeg,SK_ID_CURR))

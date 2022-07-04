@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import shap
 
-NGROK_URL = 'http://b5bc-78-123-85-16.ngrok.io'
+NGROK_URL = 'http://5471-78-123-85-16.ngrok.io'
 
 def loadData(table, id:int = -1, index = True):
     url = NGROK_URL+"/data?table="+table+"&id="+str(id)
@@ -15,8 +15,8 @@ def loadData(table, id:int = -1, index = True):
         df = pd.read_json(resp.json(),orient ='records')
     return(df)
 
-def loadDataIndexes(table, gender, family, id:int = -1, index = True):
-    url = NGROK_URL+"/dataIndex?table="+table+"&id="+str(id)+"&gender="+str(gender)+"&family="+str(family)
+def loadDataCross(table, gender, family, id:int = -1, index = True):
+    url = NGROK_URL+"/dataId?table="+table+"&id="+str(id)+"&gender="+str(gender)+"&family="+str(family)
     resp = requests.get(url)
     if index : 
         df = pd.read_json(resp.json(),orient ='records').set_index('index')
@@ -79,35 +79,50 @@ def plotHistory(sk_id_curr,previousApplication,installmentsPayments):
                 )
     return(fig)
 
-def kde_target(var_name, df, index):
-    
-    # Calculate the correlation coefficient between the new variable and the target
-    #corr = df['TARGET'].corr(df[var_name])
-    
-    # Calculate medians for repaid vs not repaid
-    #avg_repaid = df.loc[df['TARGET'] == 0, var_name].median()
-    #avg_not_repaid = df.loc[df['TARGET'] == 1, var_name].median()
-    
-    repaid = df.loc[df['TARGET'] == 0, var_name]
-    notRepaid = df.loc[df['TARGET'] == 1, var_name]
+def kde_target(score, varContrib, SK_ID_CURR):
 
-    # Group data together
-    groupData = [repaid, notRepaid]
-    groupLabels = ['TARGET == 0','TARGET == 1']
+    df = loadData(table= 'featSelect',index=True)
+    index = df.index[df['SK_ID_CURR'] == int(SK_ID_CURR)].values[0]
 
-    fig, ax = plt.subplots()
-    ax.hist(groupData, density=True,bins=20, histtype= 'step',label=groupLabels)
-    ax.legend(prop={'size': 10})
-    ax.set_title('Histogram of {var}'.format(var=var_name))
+    if score >= 30:
+        nbVar = len(varContrib)
+        var_name = [var[0] for var in varContrib]
+        nbPlot = 0
 
-    ax.vlines(
-        df.loc[:, var_name][index], 0,1, transform=ax.get_xaxis_transform(), 
-        colors='r'
-        )
+        fig, ax = plt.subplots(min(nbVar,3),1,figsize=(8,8))
+
+        while nbPlot < min(nbVar,3):
+            # Calculate the correlation coefficient between the new variable and the target
+            #corr = df['TARGET'].corr(df[var_name])
+            
+            # Calculate medians for repaid vs not repaid
+            #avg_repaid = df.loc[df['TARGET'] == 0, var_name].median()
+            #avg_not_repaid = df.loc[df['TARGET'] == 1, var_name].median()
+        
+            repaid = df.loc[df['TARGET'] == 0, var_name[nbPlot]]
+            notRepaid = df.loc[df['TARGET'] == 1, var_name[nbPlot]]
+
+            # Group data together
+            groupData = [repaid, notRepaid]
+            groupLabels = ['TARGET == 0','TARGET == 1']
+
+            
+            ax[nbPlot].hist(groupData, density=True, bins=20, histtype= 'step', label=groupLabels)
+            ax[nbPlot].legend(prop={'size': 10})
+            ax[nbPlot].set_title('Histogram of {var}'.format(var=var_name[nbPlot]))
+
+            ax[nbPlot].vlines(
+                df.loc[:, var_name[nbPlot]][index], 0,1, transform=ax[nbPlot].get_xaxis_transform(), 
+                colors='r'
+                )
+            nbPlot+=1
     
     # print out the correlation
     #print('The correlation between %s and the TARGET is %0.4f' % (var_name, corr))
     # Print out average values
     #print('Median value for loan that was not repaid = %0.4f' % avg_not_repaid)
     #print('Median value for loan that was repaid =     %0.4f' % avg_repaid)
+
+        fig.tight_layout()
+
     return(fig)
