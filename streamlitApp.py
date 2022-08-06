@@ -15,7 +15,9 @@ header3 = 'Score and interpretation'
 subheader3_1 = 'Client Score'
 subheader3_2 = 'Interpretation'
 
-url_modelAPI_predict = "http://127.0.0.1:4000/predict"
+url_modelAPI = "https://homecredit-model.herokuapp.com/"
+
+url_modelAPI_predict = url_modelAPI+"predict"
 
 st.header(header1)
 
@@ -161,7 +163,7 @@ col3_2.metric ('Repaid status', repaidStatus)
 
 st.subheader(subheader3_2)
 
-url_modelAPI_shap = "http://127.0.0.1:4000/shap?SK_ID_CURR="+str(SK_ID_CURR)
+url_modelAPI_shap = url_modelAPI+"shap?SK_ID_CURR="+str(SK_ID_CURR)
 
 test = requests.request("GET", url_modelAPI_shap)
 

@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import shap
 
-NGROK_URL = 'http://5471-78-123-85-16.ngrok.io'
+NGROK_URL = 'http://2c82-78-123-85-16.ngrok.io'
 
 def loadData(table, id:int = -1, index = True):
     url = NGROK_URL+"/data?table="+table+"&id="+str(id)
